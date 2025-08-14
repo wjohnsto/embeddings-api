@@ -20,7 +20,7 @@ bun docker
 You should have a server running on `http://localhost:8080` You can test the following request:
 
 ```sh
-curl -X POST "http://localhost:8080/api/embeddings" -H "Content-Type: application/json" -d '{"text": "hello world"}'
+curl -X POST "http://localhost:8080/api/embeddings" -H "Content-Type: application/json" -d '{"values": ["hello world"], "match": ["Hello World!"]}'
 ```
 
 ## Running tests
