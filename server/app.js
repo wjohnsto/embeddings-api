@@ -11,7 +11,7 @@ app.use((req, res, next) => {
   }
 });
 app.post("/api/embeddings", async (req, res) => {
-  let { values, match } = req.body;
+  let { values, match, withEmbeddings = false } = req.body;
 
   if (!Array.isArray(values)) {
     values = [values];
@@ -32,11 +32,22 @@ app.post("/api/embeddings", async (req, res) => {
   }
 
   const n = values.length;
-  const data = await generateEmbeddings(values);
+  const valueData = await generateEmbeddings(values);
   const matchData = await generateEmbeddings(match);
 
+  /** @type {(import("./utils/embeddings.js").Embeddings & { match: string; similarity: string; })[]} */
+  const data = [];
+
   for (let i = 0; i < n; ++i) {
-    data[i].similarity = cosinesim(data[i], matchData[i]);
+    data.push({
+      ...valueData[i],
+      match: matchData[i].text,
+      similarity: cosinesim(valueData[i], matchData[i]),
+    });
+
+    if (!withEmbeddings) {
+      data[i].embeddings = undefined;
+    }
   }
 
   res.json({

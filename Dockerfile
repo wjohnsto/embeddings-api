@@ -27,15 +27,16 @@ FROM base AS prerelease
 COPY --from=install /temp/dev/node_modules node_modules
 COPY . .
 ENV NODE_ENV=production
-RUN bun build --target=bun . --outdir build/
+RUN bun build --packages=external --target=bun . --outdir build/
 
 # copy production dependencies and source code into final image
 FROM base AS release
-COPY --from=install /temp/prod/node_modules node_modules
+USER bun
+
+COPY --chown=bun --from=install /temp/prod/node_modules node_modules
 COPY --from=prerelease /usr/src/app/build/server/index.js .
 COPY --from=prerelease /usr/src/app/package.json .
 
 # run the app
-USER bun
 EXPOSE 8080/tcp
 ENTRYPOINT [ "bun", "index.js" ]
